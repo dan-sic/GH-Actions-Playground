@@ -1,0 +1,32 @@
+name: Deploy Workflow
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Install NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: install deps
+        run: yarn install --frozen-lockfile
+      - name: run tests
+        run: yarn test
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Install NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: install deps
+        run: yarn install --frozen-lockfile
+      - name: build
+        run: yarn build
+      - name: deploy
+        run: echo 'Deploying...'
