@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Dump
-        run: echo "${{ github }}"
+        run: echo "${{ toJSON(github) }}"
   test:
     runs-on: ubuntu-latest
     steps:
