@@ -1,6 +1,11 @@
 name: Deploy Workflow
-on: push
+on: [push, workflow_dispatch]
 jobs:
+  dump_context_to_log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump
+        run: echo "${{ github }}"
   test:
     runs-on: ubuntu-latest
     steps:
