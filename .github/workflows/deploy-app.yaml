@@ -1,0 +1,66 @@
+name: Deploy project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    outputs:
+      dir: ${{ steps.yarn-cache-dir.outputs.dir }}
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+      - name: Get yarn cache dir
+        id: yarn-cache-dir
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys:
+            ${{ runner.os }}-yarn-
+      - name: Install
+        run: yarn install --frozen-lockfile
+      - name: Foo
+        id: foo
+        run: echo 'coverage=2%' >> $GITHUB_OUTPUT
+      - name: Test
+        run: npm run test
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: ${{ needs.test.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys:
+            ${{ runner.os }}-yarn-
+      - name: Install
+        run: yarn install --frozen-lockfile
+      - name: Build
+        run: npm run build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+      - name: Show artifacts
+        run: ls
+      - name: Deploy
+        run: echo 'Deploying...'
